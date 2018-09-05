@@ -4,13 +4,27 @@ Serialize = require 'libraries/serialize'
 Timer = require 'libraries/timer'
 require 'libraries/statemachine'
 
---Required files made by me
+--Helper files
 require 'params'
+require 'helperFunctions'
+
+--Class definition files
 require 'player'
 require 'button'
 require 'Map'
 require 'Weapon'
-require 'states/BaseState'
-require 'states/StartState'
-require 'states/PlayState'
-require 'states/LoadGameState'
+require 'HUD'
+require 'ProgressBar'
+require 'WeaponSlots'
+require 'Enemy'
+require 'Ground'
+require 'Obstacle'
+require 'SearchInterface'
+require 'Armor'
+require 'InventoryScreen'
+
+--State files
+require 'BaseState'
+require 'StartState'
+require 'PlayState'
+require 'LoadGameState'

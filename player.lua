@@ -1,6 +1,7 @@
 Player = Class{}
 
 local playerImage = love.graphics.newImage('images/player.png')
+local shadowImage = love.graphics.newImage('images/player_shadow2.png')
 
 function Player:init()
 	self.x = WINDOW_WIDTH/2
@@ -8,17 +9,96 @@ function Player:init()
 	self.imageWidth = playerImage:getWidth()
 	self.width = self.imageWidth*PLAYER_SCALE
 	self.playerSpeed = WALK_SPEED
-	self.weapon = Weapon('knife')
+	self.weapon = Weapon(saveState.weapon)
+	self.armor = Armor(saveState.armor)
+	self.collisionRadius = 35
+	self.hitRadius = 35
 end
 
 function Player:update(dt)
-	if love.keyboard.isDown('lshift') then 
-		self.playerSpeed = SPRINT_SPEED
-	else
-		self.playerSpeed = WALK_SPEED
+	self:switchWeapons(dt)
+	self:handleSprinting(dt)
+	self:computePlayerMovement(dt)
+	for i, obstacle in pairs(obstacles) do
+		self:collideRectangle(obstacle.mapX, obstacle.mapY, obstacle.width)
 	end
-	playerDy = 0
-	playerDx = 0
+	for i, enemy in pairs(saveState.enemyData) do
+		self:collideCircle(enemy.mapX, enemy.mapY, PLAYER_COLLISION_RADIUS)
+	end
+end
+
+--For objects to display correctly, the player needs to update before all other objects on the map.
+--However, some elements of the player class need to update after other objects.
+--In this case we need to send the lMouseDown signal to the weapon after the buttons have updated. This way the player won't fire when pressing a button.
+function Player:updateLast(dt)
+	self.weapon:update(dt, PLAYER_SCREEN_X, PLAYER_SCREEN_Y, saveState.playerDirection, lMouseDown)
+end
+
+function Player:render()
+	love.graphics.draw(shadowImage, self.x, self.y, 0, PLAYER_SCALE, PLAYER_SCALE, self.imageWidth/2, self.imageWidth/2)
+	self.weapon:render(self.x, self.y, saveState.playerDirection)
+	love.graphics.draw(playerImage, self.x, self.y, saveState.playerDirection, PLAYER_SCALE, PLAYER_SCALE, self.imageWidth/2, self.imageWidth/2)
+	self.armor:render(self.x, self.y, saveState.playerDirection)
+end
+
+function Player:collideRectangle(mapX, mapY, width, height)
+	local height = height or width
+
+	--Center point of the rectangle
+	local centerMapX = mapX + width/2
+	local centerMapY = mapY + height/2
+	local collision = false 
+
+	--Difference between centers of the player and the rectangle
+	local centerDifX = saveState.mapX - centerMapX
+	local centerDifY = saveState.mapY - centerMapY
+
+	--Check if player is within bounds.
+	if math.abs(centerDifX) < width/2 + self.collisionRadius
+	and math.abs(centerDifY) < height/2 + self.collisionRadius then 
+		collision = true 
+
+		--Adjust the player position to be outside the nearest border.
+		if width/2 - math.abs(centerDifX) < height/2 - math.abs(centerDifY) then 
+			if centerDifX > 0 then 
+				saveState.mapX = saveState.mapX + (width/2 + self.collisionRadius) - centerDifX
+			else 
+				saveState.mapX = saveState.mapX - (width/2 + self.collisionRadius) - centerDifX
+			end
+		else 
+			if centerDifY > 0 then 
+				saveState.mapY = saveState.mapY + (height/2 + self.collisionRadius) - centerDifY
+			else 
+				saveState.mapY = saveState.mapY - (height/2 + self.collisionRadius) - centerDifY
+			end
+		end
+	end
+
+	return collision
+end
+
+function Player:collideCircle(mapX, mapY, radius)
+	local angleToCircle, distanceToCircle = getAngleAndDistance(saveState.mapX, saveState.mapY, mapX, mapY)
+	if distanceToCircle < self.collisionRadius + radius then 
+		local correctionDistance = self.collisionRadius + radius - distanceToCircle
+		local correctionX, correctionY = getTriangleLegs (angleToCircle + math.pi, correctionDistance)
+		saveState.mapX = saveState.mapX + correctionX
+		saveState.mapY = saveState.mapY + correctionY
+	end
+end
+
+
+
+
+
+--********************** HELPER FUNCTIONS FOR PLAYER *************************
+
+
+
+
+function Player:computePlayerMovement(dt)
+	--determine player velocity in X and Y based on keyboard input.
+	local playerDy, playerDx = 0 , 0
 	if love.keyboard.isDown('w') then 
 		playerDy = -self.playerSpeed end
 	if love.keyboard.isDown('a') then 
@@ -28,32 +108,48 @@ function Player:update(dt)
 	if love.keyboard.isDown('d') then 
 		playerDx = self.playerSpeed end
 
-	speed = (playerDx^2 + playerDy^2)^.5
-	correctionFactor = (speed/self.playerSpeed)
+	--Determine length and direction of player velocity
+	local moveDirection, speed = getAngleAndDistance(0, 0, playerDx, playerDy)
+
+	--Correct speed if player is traveling off axis.
+		--Without this the player moves faster than "playerSpeed" when traveling diagonally.
+	local correctionFactor = self.playerSpeed/speed
 	if correctionFactor < 1 then 
 		correctionFactor = 1
 	end
-	playerDx = playerDx/correctionFactor
-	playerDy = playerDy/correctionFactor
-	saveState.mapX = saveState.mapX - playerDx*dt
-	saveState.mapY = saveState.mapY - playerDy*dt
 
-	if mouseRelativeX == 0 and mouseRelativeY == 0 then 
-		--do nothing.
-	elseif mouseRelativeX < 0 then
-		saveState.playerDirection = math.atan(mouseRelativeY/mouseRelativeX) + math.pi
-	else 
-		saveState.playerDirection = math.atan(mouseRelativeY/mouseRelativeX)
-	end
+	--Correct Speed if player is facing a different direction than they are travelling
+	local correctionFactor = 1 - MOVEMENT_CORRECTION_FACTOR * getAngleDifferenceFactor(saveState.playerDirection, moveDirection)
+	playerDx = playerDx * correctionFactor
+	playerDy = playerDy * correctionFactor
 
-	self.weapon:update(dt)
+	--Adjust player map position based on speed
+	saveState.mapX = saveState.mapX + playerDx*dt
+	saveState.mapY = saveState.mapY + playerDy*dt
+
+	saveState.playerDirection = getAngleAndDistance (PLAYER_SCREEN_X, PLAYER_SCREEN_Y, mouseX, mouseY)
 end
 
-function Player:render()
-	love.graphics.print(tostring(speed), 10, 100)
-	love.graphics.print(tostring(correctionFactor), 10, 200)
-	love.graphics.printf('mapX: '..saveState.mapX
-		..'\nmapY: '..saveState.mapY, 10, 300, WINDOW_WIDTH, 'left')
-	self.weapon:render(self.x, self.y)
-	love.graphics.draw(playerImage, self.x, self.y, saveState.playerDirection, PLAYER_SCALE, PLAYER_SCALE, self.imageWidth/2, self.imageWidth/2)
+function Player:handleSprinting(dt)
+	if love.keyboard.isDown('lshift') then
+		if saveState.stamina > 0 then  
+			self.playerSpeed = SPRINT_SPEED
+			saveState.stamina = saveState.stamina - STAMINA_DRAIN*dt
+		else 
+			saveState.stamina = -20
+			self.playerSpeed = WALK_SPEED
+		end
+	else
+		self.playerSpeed = WALK_SPEED
+		saveState.stamina = saveState.stamina + STAMINA_REGEN*dt
+	end
+	saveState.stamina = clamp(saveState.stamina, -20, saveState.maxStamina)
+end
+
+function Player:switchWeapons(dt)
+	if saveState.weapon == self.weapon:getType() then 
+		--do nothing
+	else
+		self.weapon = Weapon(saveState.weapon)
+	end
 end

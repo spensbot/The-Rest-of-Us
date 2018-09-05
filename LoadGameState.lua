@@ -2,8 +2,8 @@ LoadGameState = Class{__includes = BaseState}
 
 function LoadGameState:init()
 	self.buttonX = WINDOW_WIDTH/2 - BUTTON_WIDTH/2
-	self.firstButtonY = WINDOW_HEIGHT/2
-	self.buttonSpacing = BUTTON_HEIGHT + PADDING
+	self.firstButtonY = WINDOW_HEIGHT*1/3
+	self.buttonSpacing = BUTTON_HEIGHT + PADDING*2
 	self.saveSlots = {}
 	self.name = ''
 	self.selected = 0
@@ -49,13 +49,13 @@ function LoadGameState:update(dt)
 	if self.selected > 0 then --Has the user selected a save slot?
 		self.saveButton:update()
 		if not newGame then
-			if allSaveStates[self.selected] == nil then 
+			--if allSaveStates[self.selected] == nil then 
 					setErrorMessage('this save slot is empty')
-			else 
+			--else 
 				activeSave = self.selected
 				saveState = allSaveStates[activeSave]
 				stateMachine:change('play')
-			end
+			--end
 		else
 			if self.saveButton:isPressed() then
 				if #self.name > 0 then 
@@ -81,12 +81,12 @@ function LoadGameState:render()
 			slotInfo = 'empty'
 		else 
 			slotInfo = 'Name: '..allSaveStates[i].name
-			slotInfo = slotInfo..' Save Date: '..allSaveStates[i].saveDate
-			slotInfo = slotInfo..' Play Time: '..allSaveStates[i].playTime
+			slotInfo = slotInfo..'\n\nSave Date: '..allSaveStates[i].saveDate
+			slotInfo = slotInfo..' | Play Time (s): '..string.format('%.0f',allSaveStates[i].playTime)
 		end
 		love.graphics.printf(slotInfo,
 				self.buttonX + BUTTON_WIDTH + PADDING,
-				self.firstButtonY + self.buttonSpacing*(i-1), 
+				self.firstButtonY + self.buttonSpacing*(i-1) - PADDING, 
 				WINDOW_WIDTH, 'left')
 	end
 
@@ -97,7 +97,7 @@ function LoadGameState:render()
 
 	if newGame then 
 		love.graphics.setFont(TITLE3_FONT)
-		love.graphics.printf('Whats your name?', 0, 200, WINDOW_WIDTH, 'center')
-		love.graphics.printf(self.name, 0, 300, WINDOW_WIDTH, 'center')
+		love.graphics.printf('Whats your name?', 0, 80, WINDOW_WIDTH, 'center')
+		love.graphics.printf(self.name, 0, 160, WINDOW_WIDTH, 'center')
 	end
 end
