@@ -19,6 +19,7 @@ function HUD:init()
 	self.weaponSlots = WeaponSlots()
 	self.saveButton = Button(WINDOW_WIDTH - PADDING - BUTTON_WIDTH, WINDOW_HEIGHT - PADDING - BUTTON_HEIGHT, BUTTON_WIDTH, BUTTON_HEIGHT, 'Save')
 	self.menuButton = Button(WINDOW_WIDTH - PADDING - BUTTON_WIDTH, WINDOW_HEIGHT - PADDING*2 - BUTTON_HEIGHT*2, BUTTON_WIDTH, BUTTON_HEIGHT, 'Return to Menu')
+	self.inventoryButton = Button(WINDOW_WIDTH - PADDING - BUTTON_WIDTH, WINDOW_HEIGHT - PADDING*3 - BUTTON_HEIGHT*3, BUTTON_WIDTH, BUTTON_HEIGHT, 'Inventory')
 end
 
 function HUD:update(dt)
@@ -28,11 +29,15 @@ function HUD:update(dt)
 	self.weaponSlots:update(dt)
 	self.saveButton:update(dt)
 	self.menuButton:update(dt)
+	self.inventoryButton:update(dt)
 	if self.saveButton:isPressed() then 
 		saveGame()
 	end
 	if self.menuButton:isPressed() then 
 		stateMachine:change('start')
+	end
+	if self.inventoryButton:isPressed() then
+		saveState.inventoryOpen = not saveState.inventoryOpen
 	end
 end
 
@@ -43,6 +48,7 @@ function HUD:render()
 	self.weaponSlots:render()
 	self.saveButton:render()
 	self.menuButton:render()
+	self.inventoryButton:render()
 	self.renderAmmoCount()
 	self.renderPlayerLevel()
 end

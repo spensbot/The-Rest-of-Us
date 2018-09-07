@@ -26,7 +26,7 @@ function SearchInterface:update(dt, x, y)
 	self.screenX, self.screenY = x, y
 	self.angleToPlayer, self.distanceToPlayer = getAngleAndDistance(self.screenX, self.screenY, PLAYER_SCREEN_X, PLAYER_SCREEN_Y)
 
-	if self.distanceToPlayer < visibleDistance then
+	if self.distanceToPlayer < visibleDistance and #self.itemButtons > 0 then
 		self.searchButton:update(dt, self.screenX + relativeX + padding, self.screenY + relativeY + padding)
 		if self.searchButton:isPressed() then 
 			if self.inventoryOpen then 
@@ -54,7 +54,7 @@ function SearchInterface:update(dt, x, y)
 end
 
 function SearchInterface:render()
-	if self.distanceToPlayer < visibleDistance then
+	if self.distanceToPlayer < visibleDistance and #self.itemButtons > 0 then
 		if self.inventoryOpen then 
 			love.graphics.setColor(backgroundColor)
 			love.graphics.rectangle('fill', self.screenX + relativeX, self.screenY + relativeY, 

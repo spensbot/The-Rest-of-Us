@@ -10,7 +10,7 @@ STAMINA_DRAIN = 20 --per second, while sprinting
 STAMINA_REGEN = 10 --per second, while not sprinting
 PLAYER_HIT_RADIUS = 45
 PLAYER_COLLISION_RADIUS = 45
-MOVEMENT_CORRECTION_FACTOR = .35 --Lowers movement speed when player is looking opposite direction of movement
+MOVEMENT_CORRECTION_FACTOR = .6 --Lowers movement speed when player is looking opposite direction of movement
 
 --Graphic Parameters
 PLAYER_SCREEN_X = WINDOW_WIDTH/2
@@ -30,6 +30,7 @@ PADDING2 = 10
 --Fonts
 TITLE_FONT = love.graphics.newFont("fonts/caviardreams.ttf", 60)
 BUTTON_FONT = love.graphics.newFont("fonts/BebasNeue Regular.otf", 18)
+LABEL_FONT = love.graphics.newFont("fonts/BebasNeue Regular.otf", 24)
 SMALL_FONT = love.graphics.setNewFont("fonts/calibri.ttf", 12)
 TITLE2_FONT = love.graphics.newFont("fonts/caviardreams.ttf", 48)
 TITLE3_FONT = love.graphics.newFont("fonts/caviardreams.ttf", 36)

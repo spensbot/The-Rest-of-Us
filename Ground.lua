@@ -13,6 +13,7 @@ function Ground:update(dt)
 end
 
 function Ground:render()
+	love.graphics.setColor(WHITE)
 	self.x = -saveState.mapX % self.wrapX - self.wrapX
 	self.y = -saveState.mapY % self.wrapY - self.wrapY
 	love.graphics.draw(self.groundImage, self.x, self.y, 0)

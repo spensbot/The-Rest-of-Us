@@ -9,7 +9,7 @@ function Button:init(x, y, width, height, label, image)
 	self.image = image or nil
 	self.pressed = false
 	self.hover = false
-	self.toggle = false
+	self.toggled = false
 end
 
 function Button:update(dt,x,y)
@@ -39,7 +39,7 @@ function Button:render()
 		love.graphics.setColor(1,1,1,1)
 		--love.graphics.draw(self.image, self.x, self.y)
 	end
-	if self.hover or self.toggle then 
+	if self.hover or self.toggled then 
 		love.graphics.setColor(BUTTON_HOVER_COLOR)
 	else
 		love.graphics.setColor(BUTTON_COLOR)
@@ -49,6 +49,10 @@ function Button:render()
 	love.graphics.setFont(BUTTON_FONT)
 	local fontHeight = BUTTON_FONT:getHeight()
 	love.graphics.printf(self.label, self.x, self.y + (self.height - fontHeight)/2, self.width, 'center')
+	if self.toggled then 
+		love.graphics.setLineWidth(2)
+		love.graphics.rectangle('line', self.x, self.y, self.width, self.height)
+	end
 end
 
 function Button:setXY(x,y)
@@ -65,5 +69,5 @@ function Button:isPressed()
 end
 
 function Button:toggle()
-	self.toggle = not self.toggle
+	self.toggled = not self.toggled
 end

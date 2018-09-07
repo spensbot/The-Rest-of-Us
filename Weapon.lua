@@ -1,7 +1,10 @@
 Weapon = Class{}
 
+ammoTypes = {['9mm'] = true, ['7.62mm'] = true, ['Gasoline'] = true}
+
 weaponTypes = {
 	['Rusty Knife'] = {
+		weight = 300,
 		pSystem = {exists = false},
 		refreshDuration = .4,
 		range = 120,
@@ -22,6 +25,7 @@ weaponTypes = {
 		animationDuration = .15,
 		animationRotation = math.pi/2},
 	['9mm Pistol'] = {
+		weight = 500,
 		usesAmmo = '9mm',
 		pSystem = {exists = false},
 		refreshDuration = .3,
@@ -33,6 +37,7 @@ weaponTypes = {
 		animationDuration = .03,
 		animationRotation = math.pi/15},
 	['Assault Rifle'] = {
+		weight = 2000,
 		usesAmmo = '7.62mm',
 		pSystem = {exists = false},
 		refreshDuration = .1,
@@ -44,6 +49,7 @@ weaponTypes = {
 		animationDuration = .02,
 		animationRotation = -math.pi/30},
 	['Flamethrower'] = {
+		weight = 10000,
 		usesAmmo = 'Gasoline',
 		pSystem = {exists = true, speed = {700,1400}, lifetime = {.3,.5}, texturePath = 'textures/sparkle_cloud.png',
 			colors = {.5,.5,1,.8,  .8,.1,.1,.7,  1,1,0,.5,  .4,.4,.2,.5}, sizes = {.3,4}, spin = {5,1000}, damping = 3, emissionArea = {2, 5}},
@@ -190,7 +196,7 @@ end
 
 function Weapon:handleInput(dt, triggerPull)
 	--Check if the player has ammo for this weapon, or if the weapon doesn't use ammo
-	if saveState.ammo[self.specs.usesAmmo] == nil or saveState.ammo[self.specs.usesAmmo] > 0 then 
+	if saveState.inventory[self.specs.usesAmmo] == nil or saveState.inventory[self.specs.usesAmmo] > 0 then 
 
 		if self.specs.refreshDuration == 0 then
 			--this weapon deals continuous damage
@@ -198,7 +204,7 @@ function Weapon:handleInput(dt, triggerPull)
 				self.fired = true
 				self.applyDamage = true
 				self.showDamageArea = true
-				--saveState.ammo[self.specs.usesAmmo] = saveState.ammo[self.specs.usesAmmo] - self.specs.ammoDrain*dt
+				--saveState.inventory[self.specs.usesAmmo] = saveState.inventory[self.specs.usesAmmo] - self.specs.ammoDrain*dt
 				saveState.inventory[self.specs.usesAmmo] = clamp(saveState.inventory[self.specs.usesAmmo], 0, 100000)
 			else
 				self.fired = false
@@ -218,8 +224,8 @@ function Weapon:handleInput(dt, triggerPull)
 				}) end)
 				Timer.after(self.specs.refreshDuration, function() self.fired = false end)
 				Timer.after(self.specs.animationDuration, function() self.showDamageArea = false end)
-				if saveState.ammo[self.specs.usesAmmo] ~= nil then
-					saveState.ammo[self.specs.usesAmmo] = saveState.ammo[self.specs.usesAmmo] - 1
+				if saveState.inventory[self.specs.usesAmmo] ~= nil then
+					saveState.inventory[self.specs.usesAmmo] = saveState.inventory[self.specs.usesAmmo] - 1
 				end
 			else
 				self.applyDamage = false 

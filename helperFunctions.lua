@@ -19,6 +19,7 @@ function createNewSaveState()
     saveState.maxStamina = 100
 
     saveState.enemyData = {}
+    saveState.inventoryOpen = false
 end
 
 function spawnEnemy(mapX, mapY)

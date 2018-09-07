@@ -1,6 +1,6 @@
 require 'require'
 
-DEBUG = false
+DEBUG = true
 
 function love.load()
     setupWindow()

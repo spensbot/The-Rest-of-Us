@@ -12,7 +12,7 @@ function Player:init()
 	self.weapon = Weapon(saveState.weapon)
 	self.armor = Armor(saveState.armor)
 	self.collisionRadius = 35
-	self.hitRadius = 35
+	self.hitRadius = 35 
 end
 
 function Player:update(dt)
@@ -28,7 +28,7 @@ function Player:update(dt)
 end
 
 --For objects to display correctly, the player needs to update before all other objects on the map.
---However, some elements of the player class need to update after other objects.
+--However, some elements of the player class need to update after others.
 --In this case we need to send the lMouseDown signal to the weapon after the buttons have updated. This way the player won't fire when pressing a button.
 function Player:updateLast(dt)
 	self.weapon:update(dt, PLAYER_SCREEN_X, PLAYER_SCREEN_Y, saveState.playerDirection, lMouseDown)
