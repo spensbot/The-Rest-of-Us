@@ -37,17 +37,19 @@ function SearchInterface:update(dt, x, y)
 				self.searchButton.label = 'Exit'
 			end
 		end
-		for i, button in pairs(self.itemButtons) do
-			button[3]:update(dt, self.screenX + relativeX + padding, self.screenY + relativeY + padding* (i+1) + buttonHeight * (i))
-			if button[3]:isPressed() then
-				local item = button[1]
-				local quantity = button[2]
-				if saveState.inventory[item] == nil then 
-					saveState.inventory[item] = quantity
-				else 
-					saveState.inventory[item] = saveState.inventory[item] + quantity
+		if self.inventoryOpen then 
+			for i, button in pairs(self.itemButtons) do
+				button[3]:update(dt, self.screenX + relativeX + padding, self.screenY + relativeY + padding* (i+1) + buttonHeight * (i))
+				if button[3]:isPressed() then
+					local item = button[1]
+					local quantity = button[2]
+					if saveState.inventory[item] == nil then 
+						saveState.inventory[item] = quantity
+					else 
+						saveState.inventory[item] = saveState.inventory[item] + quantity
+					end
+					table.remove(self.itemButtons, i)
 				end
-				table.remove(self.itemButtons, i)
 			end
 		end
 	end

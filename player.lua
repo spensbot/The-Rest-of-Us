@@ -16,10 +16,10 @@ function Player:init()
 end
 
 function Player:update(dt)
-	self:switchWeapons(dt)
+	self:switchGear(dt)
 	self:handleSprinting(dt)
 	self:computePlayerMovement(dt)
-	for i, obstacle in pairs(obstacles) do
+	for i, obstacle in pairs(global.obstacles) do
 		self:collideRectangle(obstacle.mapX, obstacle.mapY, obstacle.width)
 	end
 	for i, enemy in pairs(saveState.enemyData) do
@@ -31,15 +31,19 @@ end
 --However, some elements of the player class need to update after others.
 --In this case we need to send the lMouseDown signal to the weapon after the buttons have updated. This way the player won't fire when pressing a button.
 function Player:updateLast(dt)
-	self.weapon:update(dt, PLAYER_SCREEN_X, PLAYER_SCREEN_Y, saveState.playerDirection, lMouseDown)
+	self.weapon:update(dt, PLAYER_SCREEN_X, PLAYER_SCREEN_Y, global.playerDirection, lMouseDown, true)
 end
 
 function Player:render()
 	love.graphics.draw(shadowImage, self.x, self.y, 0, PLAYER_SCALE, PLAYER_SCALE, self.imageWidth/2, self.imageWidth/2)
-	self.weapon:render(self.x, self.y, saveState.playerDirection)
-	love.graphics.draw(playerImage, self.x, self.y, saveState.playerDirection, PLAYER_SCALE, PLAYER_SCALE, self.imageWidth/2, self.imageWidth/2)
-	self.armor:render(self.x, self.y, saveState.playerDirection)
+	self.weapon:render(self.x, self.y, global.playerDirection)
+	love.graphics.draw(playerImage, self.x, self.y, global.playerDirection, PLAYER_SCALE, PLAYER_SCALE, self.imageWidth/2, self.imageWidth/2)
+	self.armor:render(self.x, self.y, global.playerDirection)
 end
+
+
+--********************** HELPER FUNCTIONS FOR PLAYER *************************
+
 
 function Player:collideRectangle(mapX, mapY, width, height)
 	local height = height or width
@@ -87,15 +91,6 @@ function Player:collideCircle(mapX, mapY, radius)
 	end
 end
 
-
-
-
-
---********************** HELPER FUNCTIONS FOR PLAYER *************************
-
-
-
-
 function Player:computePlayerMovement(dt)
 	--determine player velocity in X and Y based on keyboard input.
 	local playerDy, playerDx = 0 , 0
@@ -113,21 +108,23 @@ function Player:computePlayerMovement(dt)
 
 	--Correct speed if player is traveling off axis.
 		--Without this the player moves faster than "playerSpeed" when traveling diagonally.
-	local correctionFactor = self.playerSpeed/speed
+	local correctionFactor = speed/self.playerSpeed
 	if correctionFactor < 1 then 
 		correctionFactor = 1
 	end
+	correctionFactor = 1/correctionFactor
 
 	--Correct Speed if player is facing a different direction than they are travelling
-	local correctionFactor = 1 - MOVEMENT_CORRECTION_FACTOR * getAngleDifferenceFactor(saveState.playerDirection, moveDirection)
-	playerDx = playerDx * correctionFactor
-	playerDy = playerDy * correctionFactor
+	correctionFactor = (1 - MOVEMENT_CORRECTION_FACTOR * getAngleDifferenceFactor(global.playerDirection, moveDirection)) * correctionFactor
+
+	playerDx = playerDx * calculateTotalMultiplier(global.multipliers['Travel Speed']) * correctionFactor
+	playerDy = playerDy * calculateTotalMultiplier(global.multipliers['Travel Speed']) * correctionFactor
 
 	--Adjust player map position based on speed
 	saveState.mapX = saveState.mapX + playerDx*dt
 	saveState.mapY = saveState.mapY + playerDy*dt
 
-	saveState.playerDirection = getAngleAndDistance (PLAYER_SCREEN_X, PLAYER_SCREEN_Y, mouseX, mouseY)
+	global.playerDirection = getAngleAndDistance (PLAYER_SCREEN_X, PLAYER_SCREEN_Y, mouseX, mouseY)
 end
 
 function Player:handleSprinting(dt)
@@ -143,13 +140,19 @@ function Player:handleSprinting(dt)
 		self.playerSpeed = WALK_SPEED
 		saveState.stamina = saveState.stamina + STAMINA_REGEN*dt
 	end
-	saveState.stamina = clamp(saveState.stamina, -20, saveState.maxStamina)
+	saveState.stamina = clamp(saveState.stamina, -20, global.maxStamina)
 end
 
-function Player:switchWeapons(dt)
-	if saveState.weapon == self.weapon:getType() then 
-		--do nothing
-	else
+function Player:switchGear(dt)
+	if saveState.inventory[saveState.weapon] == nil and saveState.weapon ~= 'Fists' then
+		saveState.weapon = 'Fists'
+	elseif saveState.weapon ~= self.weapon.type then 
 		self.weapon = Weapon(saveState.weapon)
+	end
+
+	if saveState.inventory[saveState.armor] == nil and saveState.armor ~= 'None' then
+		self.armor = Armor('None')
+	elseif saveState.armor ~= self.armor.type then
+		self.armor = Armor(saveState.armor)
 	end
 end

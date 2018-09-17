@@ -1,12 +1,23 @@
 Button = Class{}
 
-function Button:init(x, y, width, height, label, image)
+BUTTON_COLOR = {.5,.5,.5, 1}
+BUTTON_HOVER_COLOR = {.5, .5, .5, .5}
+BUTTON_TEXT_COLOR = {1,1,1,1}
+BUTTON_CORNER_RADIUS = 5
+
+local hoverColor = {.5, .5, .5, .5}
+local baseColor = {.5,.5,.5, 1}
+local cornerRadius = 5
+local defaultHeight = 30
+local defaultWidth = 150
+local textColor = {1,1,1,1}
+
+function Button:init(x, y, width, height, label)
 	self.x = x 
 	self.y = y
-	self.width = width 
+	self.width = width
 	self.height = height
-	self.label = label 
-	self.image = image or nil
+	self.label = label or ""
 	self.pressed = false
 	self.hover = false
 	self.toggled = false
@@ -15,6 +26,8 @@ end
 function Button:update(dt,x,y)
 	self.x = x or self.x 
 	self.y = y or self.y
+
+	--Determine if the mouse is over the button
 	if mouseX > self.x 
 	and mouseX < self.x + self.width 
 	and mouseY > self.y 
@@ -33,22 +46,21 @@ function Button:update(dt,x,y)
 end
 
 function Button:render()
-	if self.image == nil then 
-		--do nothing
+	--Draw button body
+	if self.hover or self.toggled then
+		love.graphics.setColor(hoverColor)
 	else
-		love.graphics.setColor(1,1,1,1)
-		--love.graphics.draw(self.image, self.x, self.y)
+		love.graphics.setColor(baseColor)
 	end
-	if self.hover or self.toggled then 
-		love.graphics.setColor(BUTTON_HOVER_COLOR)
-	else
-		love.graphics.setColor(BUTTON_COLOR)
-	end
-	love.graphics.rectangle('fill', self.x, self.y, self.width, self.height, BUTTON_CORNER_RADIUS)
-	love.graphics.setColor(BUTTON_TEXT_COLOR)
+	love.graphics.rectangle('fill', self.x, self.y, self.width, self.height, cornerRadius)
+
+	--Draw button text
+	love.graphics.setColor(textColor)
 	love.graphics.setFont(BUTTON_FONT)
 	local fontHeight = BUTTON_FONT:getHeight()
 	love.graphics.printf(self.label, self.x, self.y + (self.height - fontHeight)/2, self.width, 'center')
+
+	--Draw button outline
 	if self.toggled then 
 		love.graphics.setLineWidth(2)
 		love.graphics.rectangle('line', self.x, self.y, self.width, self.height)

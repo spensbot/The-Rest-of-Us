@@ -1,6 +1,7 @@
 require 'require'
 
-DEBUG = true
+DEBUG = false
+--DEBUG = true
 
 function love.load()
     setupWindow()
@@ -36,14 +37,7 @@ function love.mousepressed(x, y, button)
 end
 
 
-
-
-
-
 --*************** HELPER FUNCTIONS FOR MAIN.LUA *********************
-
-
-
 
 
 function setupWindow()
@@ -54,6 +48,8 @@ function setupWindow()
         msaa = 0
     })
     love.window.setTitle(GAME_TITLE)
+    love.graphics.setDefaultFilter( "nearest", "nearest", 1 )
+    love.filesystem.setIdentity(GAME_TITLE)
 end
 
 function setErrorMessage(message)
@@ -144,30 +140,39 @@ function initializeGlobals()
     mouseY = 0
     lMouseDown = false
 
-    --Save data
-    love.filesystem.setIdentity(GAME_TITLE)
-    saveState = {}
-    createNewSaveState()
-    activeSave = 0
-    allSaveStates = {}
-    loadGame()
-    newGame = true
-
-
-    --Movement variables
-    playerDx = 0
-    playerDy = 0
+    --Messages
     errorMessage = ''
     debugMessages = {}
 
-    obstacles = {}
+    --Globals
+    createNewSaveState()
+    global = {
+        activeSave = 0,
+        obstacles = {},
+        obstacleData = {}, --{x,y}
+        level = 0,
+        xpToNextLevel = 0,
+        xpFromLastLevel = 0,
+        multipliers = {
+            ['Damage Dealt'] = {},
+            ['Damage Taken'] = {},
+            ['Travel Speed'] = {}
+        },
+        playerDirection = 0,
+        maxHealth = 0,
+        maxStamina = 0,
+        weight = 0,
+        categoryWeights = {},
+    }
+
 end
 
 function initializeStateMachine()
     stateMachine = StateMachine {
         ['start'] = function() return StartState() end,
         ['load'] = function() return LoadGameState() end,
-        ['play'] = function() return PlayState() end
+        ['play'] = function() return PlayState() end,
+        ['death'] = function() return DeathState() end
     }
     stateMachine:change('start')
 end

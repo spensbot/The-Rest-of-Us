@@ -1,11 +1,14 @@
 StartState = Class{__includes = BaseState}
 
+local buttonWidth = 150
+local buttonHeight = 30
+
 function StartState:init()
-	self.buttonX = WINDOW_WIDTH/2 - BUTTON_WIDTH/2
-	self.firstButtonY = WINDOW_HEIGHT/2 - BUTTON_HEIGHT
-	self.secondButtonY = self.firstButtonY + BUTTON_HEIGHT + PADDING
-	self.loadButton = Button(self.buttonX, self.firstButtonY, BUTTON_WIDTH, BUTTON_HEIGHT, 'load game')
-	self.newButton = Button(self.buttonX, self.secondButtonY, BUTTON_WIDTH, BUTTON_HEIGHT, 'new game')
+	self.buttonX = WINDOW_WIDTH/2 - buttonWidth/2
+	self.firstButtonY = WINDOW_HEIGHT/2 - buttonHeight
+	self.secondButtonY = self.firstButtonY + buttonHeight + PADDING
+	self.loadButton = Button(self.buttonX, self.firstButtonY, buttonWidth, buttonHeight, 'load game')
+	self.newButton = Button(self.buttonX, self.secondButtonY, buttonWidth, buttonHeight, 'new game')
 end
 
 function StartState:update(dt)

@@ -1,11 +1,11 @@
 Ground = Class{}
 
 function Ground:init()
-	self.groundImage = love.graphics.newImage('images/background 3240x2160.png')
+	self.groundImage = love.graphics.newImage('images/scrolling background.png')
 	self.x = 0
 	self.y = 0
-	self.wrapX = 1080
-	self.wrapY = 720
+	self.wrapX = 3840
+	self.wrapY = 2160
 end
 
 function Ground:update(dt)

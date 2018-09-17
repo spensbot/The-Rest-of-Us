@@ -1,69 +1,5 @@
 Weapon = Class{}
 
-ammoTypes = {['9mm'] = true, ['7.62mm'] = true, ['Gasoline'] = true}
-
-weaponTypes = {
-	['Rusty Knife'] = {
-		weight = 300,
-		pSystem = {exists = false},
-		refreshDuration = .4,
-		range = 120,
-		spread = math.pi/2,
-		dps = 20,
-		imagePath = 'images/knife.png',
-		soundPaths = {'audio/blade1.wav','audio/blade2.wav','audio/blade3.wav'},
-		animationDuration = .15,
-		animationRotation = math.pi/2}, 
-	['Fists'] = {
-		pSystem = {exists = false},
-		refreshDuration = .3,
-		range = 80,
-		spread = math.pi/2,
-		dps = 10,
-		imagePath = 'images/fists2.png',
-		soundPaths = {'audio/punch1.wav','audio/punch2.wav'},
-		animationDuration = .15,
-		animationRotation = math.pi/2},
-	['9mm Pistol'] = {
-		weight = 500,
-		usesAmmo = '9mm',
-		pSystem = {exists = false},
-		refreshDuration = .3,
-		range = 800,
-		spread = 0,
-		dps = 20,
-		imagePath = 'images/pistol.png',
-		soundPaths = {'audio/pew.wav'},
-		animationDuration = .03,
-		animationRotation = math.pi/15},
-	['Assault Rifle'] = {
-		weight = 2000,
-		usesAmmo = '7.62mm',
-		pSystem = {exists = false},
-		refreshDuration = .1,
-		range = 800,
-		spread = 0,
-		dps = 100,
-		imagePath = 'images/assaultRifle.png',
-		soundPaths = {'audio/pop1.wav','audio/pop2.wav'},
-		animationDuration = .02,
-		animationRotation = -math.pi/30},
-	['Flamethrower'] = {
-		weight = 10000,
-		usesAmmo = 'Gasoline',
-		pSystem = {exists = true, speed = {700,1400}, lifetime = {.3,.5}, texturePath = 'textures/sparkle_cloud.png',
-			colors = {.5,.5,1,.8,  .8,.1,.1,.7,  1,1,0,.5,  .4,.4,.2,.5}, sizes = {.3,4}, spin = {5,1000}, damping = 3, emissionArea = {2, 5}},
-		refreshDuration = 0,
-		range = 400,
-		spread = math.pi/4,
-		dps = 100,
-		imagePath = 'images/flamethrower.png',
-		soundPaths = {'audio/flames1.wav'},
-		animationDuration = 1,
-		animationRotation = 0,
-		ammoDrain = 30} --Per second
-}
-
 local damageArcColor = {1,1,.1,.5}
 
 function Weapon:init(type)
@@ -84,8 +20,8 @@ function Weapon:init(type)
 	end
 end
 
-function Weapon:update(dt, x, y, angle, fire)
-	self:handleInput(dt, fire)
+function Weapon:update(dt, x, y, angle, fire, belongsToPlayer)
+	self:handleInput(dt, fire, belongsToPlayer)
 	if self.specs.pSystem['exists'] then 
 		self:updateParticleSystem(dt, x, y, angle)
 	end
@@ -99,7 +35,6 @@ function Weapon:render(x,y,angle)
 		love.graphics.draw(self.pSystem, 0, 0)
 	end
 	love.graphics.draw(self.image, x, y, angle + self.rotation, PLAYER_SCALE, PLAYER_SCALE, self.imageWidth/2, self.imageWidth/2)
-
 end
 
 function Weapon:damageCircle(mapX,mapY,hitX,hitY,aimAngle,radius,dt)
@@ -123,10 +58,6 @@ function Weapon:damageCircle(mapX,mapY,hitX,hitY,aimAngle,radius,dt)
 	return damage
 end
 
-function Weapon:getType()
-	return self.type
-end
-
 
 
 --*************************** HELPER FUNCTIONS FOR WEAPON CLASS ***********************
@@ -134,16 +65,14 @@ end
 
 
 function Weapon:drawDamageArea(x,y,angle)
-	if DEBUG then 
-		if self.showDamageArea then
-			love.graphics.setColor(damageArcColor)
-			if self.specs.spread > 0 then 
-				love.graphics.arc('fill', x, y, self.specs.range, -self.specs.spread/2 + angle, self.specs.spread/2 + angle)
-			else 
-				love.graphics.setLineWidth(2)
-				local x2, y2 = getRelativePoint(x, y, self.specs.range, angle)
-				love.graphics.line(x, y, x2, y2)
-			end
+	if self.showDamageArea then
+		love.graphics.setColor(damageArcColor)
+		if self.specs.spread == 0 then
+			love.graphics.setLineWidth(2)
+			local x2, y2 = getRelativePoint(x, y, self.specs.range, angle)
+			love.graphics.line(x, y, x2, y2)
+		elseif DEBUG then
+			love.graphics.arc('fill', x, y, self.specs.range, -self.specs.spread/2 + angle, self.specs.spread/2 + angle)
 		end
 	end
 end
@@ -194,9 +123,14 @@ function Weapon:updateParticleSystem(dt, x, y, angle)
 	self.pSystem:update(dt)
 end
 
-function Weapon:handleInput(dt, triggerPull)
-	--Check if the player has ammo for this weapon, or if the weapon doesn't use ammo
-	if saveState.inventory[self.specs.usesAmmo] == nil or saveState.inventory[self.specs.usesAmmo] > 0 then 
+function Weapon:handleInput(dt, triggerPull, belongsToPlayer)
+
+	local ammoCount = saveState.inventory[self.specs.usesAmmo]
+
+	--Check if the player has ammo for this weapon
+	--or if the weapon doesn't use ammo
+	--or if the weapon belongs to an enemy (they have unlimited ammo)
+	if (self.specs.usesAmmo == nil) or (ammoCount ~= nil and ammoCount > 0) or (not belongsToPlayer) then 
 
 		if self.specs.refreshDuration == 0 then
 			--this weapon deals continuous damage
@@ -204,8 +138,10 @@ function Weapon:handleInput(dt, triggerPull)
 				self.fired = true
 				self.applyDamage = true
 				self.showDamageArea = true
-				--saveState.inventory[self.specs.usesAmmo] = saveState.inventory[self.specs.usesAmmo] - self.specs.ammoDrain*dt
-				saveState.inventory[self.specs.usesAmmo] = clamp(saveState.inventory[self.specs.usesAmmo], 0, 100000)
+				if belongsToPlayer then
+					ammoCount = ammoCount - self.specs.ammoDrain*dt
+					saveState.inventory[self.specs.usesAmmo] = clamp(ammoCount, 0, 100000)
+				end
 			else
 				self.fired = false
 				self.applyDamage = false
@@ -224,8 +160,8 @@ function Weapon:handleInput(dt, triggerPull)
 				}) end)
 				Timer.after(self.specs.refreshDuration, function() self.fired = false end)
 				Timer.after(self.specs.animationDuration, function() self.showDamageArea = false end)
-				if saveState.inventory[self.specs.usesAmmo] ~= nil then
-					saveState.inventory[self.specs.usesAmmo] = saveState.inventory[self.specs.usesAmmo] - 1
+				if ammoCount ~= nil then
+					saveState.inventory[self.specs.usesAmmo] = ammoCount - 1
 				end
 			else
 				self.applyDamage = false 

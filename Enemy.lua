@@ -1,22 +1,5 @@
 Enemy = Class{}
 
-enemyTypes = {
-	['drone'] = { 
-		hitRadius = 45,
-		collisionRadius = 45,
-		ignorantVision = 400, --Distance from which AI can see player, assuming the AI doesn't currently see player.
-		knownVision = 600, --Distance at which AI will loose track of player.
-		visionFactor = .5, --Factor that lowers ignorantVision distance when player is behind AI.
-		runSpeed = 200,
-		scale = .3,
-		pursuingImagePath = 'images/enemy_pursuing.png',
-		deadImagePath = 'images/enemy_dead.png',
-		ignorantImagePath = 'images/enemy_ignorant.png',
-		shadowImagePath = 'images/player_shadow2.png',
-		level = 10
-	}
-}
-
 function Enemy:init(identifier)
 	self.identifier = identifier
 	self.data = saveState.enemyData[identifier]
@@ -57,11 +40,14 @@ end
 function Enemy:update(dt)
 	self.x, self.y = transformMapToScreen(self.data.mapX,self.data.mapY)
 	self:AIUpdate(dt)
-	self.weapon:update(dt, self.x, self.y, self.rotation, self.fire)
+	self.weapon:update(dt, self.x, self.y, self.rotation, self.fire, false)
 	self.healthBar:update(dt,self.x - self.width/2,self.y - 70,self.data.health,self.data.maxHealth)
 	self.searchInterface:update(dt, self.x, self.y)
 	saveState.enemyData[self.identifier] = self.data
 	if self.data.health <= 0 then 
+		if self.dead == false then 
+			self:uponDeath()
+		end
 		self.dead = true 
 	end
 	if self.lastHealth > self.data.health then 
@@ -147,7 +133,7 @@ function Enemy:AIUpdate(dt)
 
 		self.data.mapX = self.data.mapX + self.dx * dt 
 		self.data.mapY = self.data.mapY + self.dy * dt 
-		for i, obstacle in pairs(obstacles) do
+		for i, obstacle in pairs(global.obstacles) do
 			self:collideRectangle(obstacle.mapX, obstacle.mapY, obstacle.width)
 		end
 	end
@@ -190,5 +176,5 @@ function Enemy:collideRectangle(mapX, mapY, width, height)
 end
 
 function Enemy:uponDeath()
-	
+	saveState.xp = saveState.xp + 1000
 end

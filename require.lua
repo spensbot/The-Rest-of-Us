@@ -7,6 +7,7 @@ require 'libraries/statemachine'
 --Helper files
 require 'params'
 require 'helperFunctions'
+require 'typeDefs'
 
 --Class definition files
 require 'player'
@@ -15,16 +16,18 @@ require 'Map'
 require 'Weapon'
 require 'HUD'
 require 'ProgressBar'
-require 'WeaponSlots'
 require 'Enemy'
 require 'Ground'
 require 'Obstacle'
 require 'SearchInterface'
 require 'Armor'
 require 'InventoryScreen'
+require 'StoryPoint'
+require 'Searchable'
 
 --State files
 require 'BaseState'
 require 'StartState'
 require 'PlayState'
 require 'LoadGameState'
+require 'DeathState'

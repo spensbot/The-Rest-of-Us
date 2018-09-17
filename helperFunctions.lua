@@ -1,25 +1,31 @@
+--The saveState table contains everything that is saved to disk between games.
 function createNewSaveState()
-    saveState.inventory = {['Quartz'] = 100, ['Health Kit'] = 2, ['Football Helmet'] = 1, ['Headband'] = 1,
-    	['Trucker Cap'] = 1, ['Bike Helmet'] = 1, ['Rusty Knife'] = 1, ['9mm Pistol'] = 1,
-    	['Flamethrower'] = 1, ['Assault Rifle'] = 1, ['9mm'] = 100, ['Gasoline'] = 100, ['7.62mm'] = 100}
-    saveState.weapon = 'Fists'
-    saveState.weaponSlots = {[2]='Rusty Knife', [3]='9mm Pistol', [4]='Flamethrower', [5]='Assault Rifle'}
-    saveState.armor = 'Headband'
+	saveState = {}
 
-    saveState.level = 1
+	saveState.name = ''
+	saveState.inventory = {}
+	saveState.weapon = 'Fists'
+	saveState.armor = 'None'
     saveState.xp = 0
-
     saveState.playTime = 0
     saveState.mapX = 0
     saveState.mapY = 0
-    saveState.playerDirection = 0
     saveState.health = 100
-    saveState.maxHealth = 100
     saveState.stamina = 100
-    saveState.maxStamina = 100
-
-    saveState.enemyData = {}
+    saveState.enemyData = {} --A table of data for every enemy on the map.
     saveState.inventoryOpen = false
+    saveState.searchableData = {} --A table of data for every searchable on the map.
+
+	if DEBUG then 
+	    saveState.inventory = {['Quartz'] = 100, ['Health Kit'] = 2, ['Football Helmet'] = 1, ['Headband'] = 1,
+	    	['Trucker Cap'] = 1, ['Bike Helmet'] = 1, ['Rusty Knife'] = 1, ['9mm Pistol'] = 1,
+	    	['Flamethrower'] = 1, ['Assault Rifle'] = 1, ['9mm'] = 100, ['Gasoline'] = 100, ['7.62mm'] = 100}
+	    saveState.weapon = 'Assault Rifle'
+	    saveState.armor = 'Trucker Cap'
+
+	    saveState.level = 1
+	    saveState.xp = 0
+	end
 end
 
 function spawnEnemy(mapX, mapY)
@@ -31,24 +37,6 @@ function spawnEnemy(mapX, mapY)
 		damageMultiplier = .25,
 		['weapon'] = 'knife'}
 	table.insert(saveState.enemyData, enemy)
-end
-
---loads all serialized save states into a single table.
-function loadGame()
-	for slot = 1, NUM_SAVE_SLOTS do
-		if love.filesystem.exists('save'..tostring(slot)..'.lua') then 
-			local chunk = love.filesystem.load('save'..tostring(slot)..'.lua')
-			allSaveStates[slot] = chunk()
-		end
-	end
-end
-
---Serializes 'saveState' and saves it to save_.lua file corresponding to the active save
-function saveGame()
-	saveState.saveDate = os.date("%x", os.time())
-	local success = love.filesystem.write('save'..tostring(activeSave)..'.lua', Serialize(saveState))
-	setErrorMessage('Game Saved in Slot: '..activeSave)
-	return success
 end
 
 function transformMapToScreen(mapX,mapY)
@@ -65,6 +53,13 @@ function getRelativePoint(x, y, distance, angle)
 	local outputY = y + yLeg
 
 	return outputX, outputY
+end
+
+function getDistance(point1x, point1y, point2x, point2y)
+	local relativeX = point2x - point1x
+	local relativeY = point2y - point1y
+	local relativeDistance = (relativeX^2 + relativeY^2)^.5
+	return relativeDistance
 end
 
 --returns the angle of point2 relative to point1. Also returns distance between the points.
@@ -112,8 +107,27 @@ function getTriangleLegs (angle, hypotenuse)
 end
 
 function printInfo()
+	love.graphics.setColor(WHITE)
 	love.graphics.setFont(BUTTON_FONT)
-	love.graphics.printf('Player Name: '..saveState.name, PADDING, WINDOW_HEIGHT - PADDING * 5, WINDOW_WIDTH, 'left')
-	love.graphics.printf('Play Time: '..string.format('%.0f',saveState.playTime), PADDING, WINDOW_HEIGHT - PADDING*4, WINDOW_WIDTH, 'left')
+	--love.graphics.printf('Player Name: '..saveState.name, PADDING, WINDOW_HEIGHT - PADDING * 5, WINDOW_WIDTH, 'left')
+	--love.graphics.printf('Play Time: '..string.format('%.0f',saveState.playTime), PADDING, WINDOW_HEIGHT - PADDING*4, WINDOW_WIDTH, 'left')
 	love.graphics.printf('FPS: '..tostring(love.timer.getFPS()), PADDING, WINDOW_HEIGHT - PADDING*3, WINDOW_WIDTH, 'left')
+end
+
+function countElements(table)
+	local count = 0
+	if table ~= nil then
+		for key, value in pairs(table) do
+			count = count + 1
+		end
+	end
+	return count 
+end
+
+function calculateTotalMultiplier(multiplierTable)
+	local totalMultiplier = 1
+	for label, multiplier in pairs(multiplierTable) do
+		totalMultiplier = totalMultiplier * multiplier
+	end
+	return totalMultiplier
 end
