@@ -23,18 +23,19 @@ function Enemy:init(identifier)
 	self.lastHealth = self.data.health
 	self.dead = false
 	self.armor = Armor('Trucker Cap')
-	self.weapon = Weapon('Flamethrower')
+	self.weapon = Weapon('Fists')
+	self.inventory = {['Quartz'] = 10, [self.armor.type] = 1, ['Health Kit'] = 1, }
 
 	--Assign weapon randomly from list of possible weapons
 	--self.weapon = Weapon(self.specs.possibleWeapons[love.math.random(#self.specs.possibleWeapons)])
-	self.inventory = {['Quartz'] = 10, [self.armor.type] = 1, ['Health Kit'] = 1}
+	
 	if self.weapon.specs.usesAmmo ~= nil then 
 		self.inventory[self.weapon.specs.usesAmmo] = 10
 	end
 	if self.weapon.type ~= 'Fists' then
 		self.inventory[self.weapon.type] = 1
 	end
-	self.searchInterface = SearchInterface(self.inventory)
+	self.searchInterface = SearchInterface(self.inventory, self)
 end
 
 function Enemy:update(dt)
@@ -133,8 +134,10 @@ function Enemy:AIUpdate(dt)
 
 		self.data.mapX = self.data.mapX + self.dx * dt 
 		self.data.mapY = self.data.mapY + self.dy * dt 
-		for i, obstacle in pairs(global.obstacles) do
-			self:collideRectangle(obstacle.mapX, obstacle.mapY, obstacle.width)
+		for i, object in pairs(global.barriers) do
+			if object.collides then 
+				self:collideRectangle(object.mapX, object.mapY, object.width)
+			end
 		end
 	end
 end

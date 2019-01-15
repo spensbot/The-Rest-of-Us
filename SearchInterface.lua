@@ -8,7 +8,8 @@ local backgroundColor = {0,0,0,.85}
 local relativeX = -(buttonWidth + padding * 2)/2
 local relativeY = -70
 
-function SearchInterface:init(inventory)
+function SearchInterface:init(inventory, parent)
+	self.parent = parent
 	self.screenX = 0
 	self.screenY = 0
 	self.itemButtons = {}

@@ -1,13 +1,7 @@
-Searchable = Class{}
+Searchable = Class{__includes = MapObject}
 
-local searchableTypes = {
-	['Chest'] = {
-		['fullImage'] = {love.graphics.newImage('images/chest_yellow.png'), love.graphics.newImage('images/chest_pink.png')},
-		['emptyImage'] = love.graphics.newImage('images/chest_empty.png')
-	}
-}
-
-function Searchable:init(mapX, mapY, width, type, inventory)
+function Searchable:init(mapX, mapY, width, inventory, type)
+	self.collides = true
 	self.type = type
 	self.imageId = 1
 	self.mapX = mapX

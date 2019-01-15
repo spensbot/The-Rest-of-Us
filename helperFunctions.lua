@@ -8,13 +8,13 @@ function createNewSaveState()
 	saveState.armor = 'None'
     saveState.xp = 0
     saveState.playTime = 0
-    saveState.mapX = 0
-    saveState.mapY = 0
-    saveState.health = 100
+    saveState.mapX = 900
+    saveState.mapY = 9000
+    saveState.health = 300
     saveState.stamina = 100
-    saveState.enemyData = {} --A table of data for every enemy on the map.
     saveState.inventoryOpen = false
-    saveState.searchableData = {} --A table of data for every searchable on the map.
+    saveState.enemyData = {} --A table of data for every enemy on the map.
+    saveState.searchablesData = {} --A table of data for every searchable on the map.
 
 	if DEBUG then 
 	    saveState.inventory = {['Quartz'] = 100, ['Health Kit'] = 2, ['Football Helmet'] = 1, ['Headband'] = 1,
@@ -28,14 +28,15 @@ function createNewSaveState()
 	end
 end
 
-function spawnEnemy(mapX, mapY)
+function spawnEnemy(mapX, mapY, type, level, weapon)
 	enemy = {['mapX'] = mapX,
 		['mapY'] = mapY,
-		['type'] = 'drone',
+		['type'] = type,
+		level = level,
 		health = 100,
 		maxHealth = 100,
-		damageMultiplier = .25,
-		['weapon'] = 'knife'}
+		weapon = weapon or nil,
+		inventory = {}}
 	table.insert(saveState.enemyData, enemy)
 end
 

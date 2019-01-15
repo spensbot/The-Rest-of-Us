@@ -19,8 +19,10 @@ function Player:update(dt)
 	self:switchGear(dt)
 	self:handleSprinting(dt)
 	self:computePlayerMovement(dt)
-	for i, obstacle in pairs(global.obstacles) do
-		self:collideRectangle(obstacle.mapX, obstacle.mapY, obstacle.width)
+	for i, object in pairs(global.barriers) do
+		if object.collides then
+			self:collideRectangle(object.mapX,object.mapY,object.width)
+		end
 	end
 	for i, enemy in pairs(saveState.enemyData) do
 		self:collideCircle(enemy.mapX, enemy.mapY, PLAYER_COLLISION_RADIUS)

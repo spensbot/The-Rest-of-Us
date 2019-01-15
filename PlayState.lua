@@ -117,19 +117,22 @@ function PlayState:calculateXP(level, factor, levelShift)
 end
 
 function PlayState:updateEnemies(dt)
+	local enemySpawnDistance = WINDOW_WIDTH * 2
+
 	--Update all enemies
-	for i, enemy in pairs(saveState.enemyData) do
-		if self.enemies[i] == nil then 
-			self.enemies[i] = Enemy(i)
-		end
+	for i, enemy in pairs(self.enemies) do
 		self.enemies[i]:update(dt)
 	end
 
-	--Remove enemies based on distance from player
+	--Remove enemies based on distance from player. Add enemies if they are close enough.
 	for i, enemy in pairs(saveState.enemyData) do
-		if enemy.health <= 0 then
-			--saveState.enemyData[i] = nil
-			--self.enemies[i] = nil
+		local distanceToPlayer = getDistance(saveState.mapX, saveState.mapY, enemy.mapX, enemy.mapY)
+		if distanceToPlayer > enemySpawnDistance then
+			self.enemies[i] = nil
+		else 
+			if self.enemies[i] == nil then 
+				self.enemies[i] = Enemy(i)
+			end
 		end
 	end
 

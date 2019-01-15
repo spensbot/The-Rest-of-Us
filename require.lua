@@ -2,28 +2,33 @@
 Class = require 'libraries/class'
 Serialize = require 'libraries/serialize'
 Timer = require 'libraries/timer'
-require 'libraries/statemachine'
+require 'libraries/StateMachine'
 
 --Helper files
 require 'params'
 require 'helperFunctions'
 require 'typeDefs'
+require 'resources'
 
---Class definition files
-require 'player'
-require 'button'
-require 'Map'
+--Character Classes
+require 'Player'
 require 'Weapon'
+require 'Enemy'
+require 'Armor'
+
+--GUI Classes
+require 'Button'
+require 'InventoryScreen'
 require 'HUD'
 require 'ProgressBar'
-require 'Enemy'
-require 'Ground'
-require 'Obstacle'
 require 'SearchInterface'
-require 'Armor'
-require 'InventoryScreen'
+
+--Map Classes
+require 'Map'
+require 'Ground'
+require 'MapObject'
+require 'TerrainObject'
 require 'StoryPoint'
-require 'Searchable'
 
 --State files
 require 'BaseState'

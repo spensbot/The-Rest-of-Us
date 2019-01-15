@@ -1,7 +1,7 @@
 require 'require'
 
 DEBUG = false
---DEBUG = true
+DEBUG = true
 
 function love.load()
     setupWindow()
@@ -148,8 +148,9 @@ function initializeGlobals()
     createNewSaveState()
     global = {
         activeSave = 0,
-        obstacles = {},
-        obstacleData = {}, --{x,y}
+        barriers = {},
+        searchables = {},
+        dropPackages = {},
         level = 0,
         xpToNextLevel = 0,
         xpFromLastLevel = 0,

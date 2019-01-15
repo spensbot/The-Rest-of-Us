@@ -31,16 +31,35 @@ function InventoryScreen:init()
 	self.itemButtons = {}
 	self.dropButton = Button(actionButtonX, actionButtonY, buttonWidth, buttonHeight, 'Drop')
 	self.otherButton = Button(actionButtonX + buttonWidth + padding, actionButtonY, buttonWidth, buttonHeight, '')
-	self.itemSelected = false
-	self.lastSelectedItem = ''
-	self.lastSelectedCategory = ''
+	self.selectedItem = nil
+	self.selectedCategory = nil
+	self.lastOpen = saveState.inventoryOpen
+	self.droppedInventory = {}
+end
+
+function InventoryScreen:uponOpen()
+	
+end
+
+function InventoryScreen:uponClose()
+	if self.droppedInventory ~= {} then
+		table.insert(global.dropPackages, MapObject(saveState.mapX, saveState.mapY, 'dropPackage', 100, false, self.droppedInventory))
+		self.droppedInventory = {}
+	end
 end
 
 function InventoryScreen:update(dt)
+	if saveState.inventoryOpen ~= self.lastOpen then
+		self.lastOpen = saveState.inventoryOpen
+		if saveState.inventoryOpen then 
+			self:uponOpen()
+		else
+			self:uponClose()
+		end
+	end
+
 	if saveState.inventoryOpen then
 		rowCounter = {0,0,0,0}
-		self.itemSelected = false
-		self.selectedItems = {}
 
 		--add a button for each new item
 		for item, quantity in pairs(saveState.inventory) do
@@ -70,34 +89,45 @@ function InventoryScreen:update(dt)
 					rowCounter[category] = rowCounter[category] + 1
 					if button:isPressed() then 
 						button:toggle()
-						self.otherButton.label = otherButtonLabels[category]
-						self.lastSelectedItem = item
-						self.lastSelectedCategory = category
+						if button.toggled == true then 
+							self.otherButton.label = otherButtonLabels[category]
+							self.selectedItem = item
+							self.selectedCategory = category
+						else 
+							self.selectedItem = nil 
+							self.selectedCategory = nil 
+						end
 					end
 					break
 				end
 			end
-			if button.toggled then 
-				self.selectedItems[item] = quantity
-			else 
-				self.selectedItems[item] = nil
+
+			--Untoggle any buttons that haven't just been selected.
+			if self.selectedItem ~= item then
+				button.toggled = false
 			end
 		end	
 
 		--Update action buttons
-		self.dropButton:update(dt)
-		if self.dropButton:isPressed() then 
-			for item, quantity in pairs(self.selectedItems) do
-				saveState.inventory[item] = nil 
+		if self.selectedItem ~= nil then 
+			self.dropButton:update(dt)
+			if self.dropButton:isPressed() then 
+				if saveState.inventory[self.selectedItem] ~= nil then
+					if self.droppedInventory[self.selectedItem] == nil then 
+						self.droppedInventory[self.selectedItem] = 1
+					else
+						self.droppedInventory[self.selectedItem] = self.droppedInventory[self.selectedItem] + 1
+					end
+					if saveState.inventory[self.selectedItem] > 1 then
+						saveState.inventory[self.selectedItem]  = saveState.inventory[self.selectedItem] - 1
+					elseif saveState.inventory[self.selectedItem] == 1 then 
+						saveState.inventory[self.selectedItem] = nil
+					end
+				end
 			end
-		end
-		self.otherButton:update(dt)
-		if self.otherButton:isPressed() then 
-			otherButtonFunctions[self.lastSelectedCategory](self.lastSelectedItem)
-		end
-		if self.otherButton:isPressed() or self.dropButton:isPressed() then
-			for item, data in pairs(self.itemButtons) do
-				data[1].toggled = false
+			self.otherButton:update(dt)
+			if self.otherButton:isPressed() then 
+				otherButtonFunctions[self.selectedCategory](self.selectedItem)
 			end
 		end
 	end
@@ -125,7 +155,7 @@ function InventoryScreen:render()
 		end
 
 		--Draw action buttons
-		if countElements(self.selectedItems) > 0 then
+		if self.selectedItem ~= nil then
 			self.dropButton:render()
 			self.otherButton:render()
 		end

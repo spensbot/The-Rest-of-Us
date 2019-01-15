@@ -84,13 +84,13 @@ enemyTypes = {
 		ignorantVision = 500, --Distance from which AI can see player, assuming the AI doesn't currently see player.
 		knownVision = 1000, --Distance at which AI will loose track of player.
 		visionFactor = .5, --Factor that lowers ignorantVision distance when player is behind AI.
-		runSpeed = 200,
+		runSpeed = 500,
+		turnSpeed = 1, --Rads per second
 		scale = .3,
 		pursuingImagePath = 'images/enemy_pursuing.png',
 		deadImagePath = 'images/enemy_dead.png',
 		ignorantImagePath = 'images/enemy_ignorant.png',
 		shadowImagePath = 'images/player_shadow2.png',
-		level = 10
 	}
 }
 

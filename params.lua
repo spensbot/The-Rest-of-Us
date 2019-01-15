@@ -11,9 +11,7 @@ PLAYER_HIT_RADIUS = 45
 PLAYER_COLLISION_RADIUS = 45
 MOVEMENT_CORRECTION_FACTOR = .6 --Lowers movement speed when player is looking opposite direction of movement
 LEVEL_CAP = 50
-
 NUM_SAVE_SLOTS = 5
-
 
 --Graphic Parameters
 PLAYER_SCREEN_X = WINDOW_WIDTH/2
@@ -22,45 +20,9 @@ PLAYER_SCALE = .3
 PADDING = 20
 PADDING2 = 10
 
---Fonts
-TITLE_FONT = love.graphics.newFont("fonts/caviardreams.ttf", 60)
-BUTTON_FONT = love.graphics.newFont("fonts/calibri.ttf", 18)
-LABEL_FONT = love.graphics.newFont("fonts/BebasNeue Regular.otf", 24)
-LABEL_FONT2 = love.graphics.newFont("fonts/BebasNeue Regular.otf", 20)
-SMALL_FONT = love.graphics.setNewFont("fonts/calibri.ttf", 18)
-TITLE2_FONT = love.graphics.newFont("fonts/caviardreams.ttf", 48)
-TITLE3_FONT = love.graphics.newFont("fonts/caviardreams.ttf", 36)
-
 --Colors
 WHITE = {1,1,1,1}
 BLACK = {0,0,0,1}
 
-
 --Strings
 GAME_TITLE = 'The Rest of Us'
-
---Images
-IMAGES = {
-	playerimage = love.graphics.newImage('images/player.png'),
-}
-
---Sounds
-SOUNDS = {
-	enemySeesPlayer = {
-		love.audio.newSource('audio/EnemySeesPlayer1.wav', 'stream'),
-		love.audio.newSource('audio/EnemySeesPlayer2.wav', 'stream'),
-		love.audio.newSource('audio/EnemySeesPlayer3.wav', 'stream'),
-		love.audio.newSource('audio/EnemySeesPlayer4.wav', 'stream'),
-		love.audio.newSource('audio/EnemySeesPlayer5.wav', 'stream')
-	},
-	enemyLoosesPlayer = {
-		love.audio.newSource('audio/EnemyLoosesPlayer1.wav', 'stream'),
-		love.audio.newSource('audio/EnemyLoosesPlayer2.wav', 'stream'),
-		love.audio.newSource('audio/EnemyLoosesPlayer3.wav', 'stream')
-	}
-}
-
---Music
-MUSIC = {
-	song1 = love.audio.newSource('audio/The Rest of Us.wav', 'stream')
-}
